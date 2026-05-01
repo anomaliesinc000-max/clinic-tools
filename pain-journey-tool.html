@@ -621,6 +621,30 @@
     color: var(--muted);
     line-height: 1.8;
   }
+
+  /* ── Option link button ── */
+  .option-link-wrap {
+    padding: 0 16px 16px;
+  }
+  .option-link {
+    display: block;
+    text-align: center;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  .option-link:active { opacity: 0.7; }
+  .card-premium .option-link {
+    background: #FFF0E8;
+    color: #D4691E;
+  }
+  .card-posture .option-link {
+    background: #EEF2FB;
+    color: var(--accent-blue);
+  }
 </style>
 </head>
 <body>
@@ -760,6 +784,9 @@
       <div class="chip active">🔄 動き方の定着</div>
       <div class="chip">日常動作の質を上げる</div>
     </div>
+    <div class="option-link-wrap">
+      <a href="https://tsugumi-salon.com/premium-course/" target="_blank" class="option-link">詳しく見る →</a>
+    </div>
   </div>
 
   <div class="option-card card-posture">
@@ -775,6 +802,9 @@
       <div class="chip active">🪞 美しい姿勢へ</div>
       <div class="chip active">💪 本気で治す</div>
       <div class="chip">専用プログラム</div>
+    </div>
+    <div class="option-link-wrap">
+      <a href="https://tsugumi-salon.com/service/hunched-position-treatment/" target="_blank" class="option-link">詳しく見る →</a>
     </div>
   </div>
 </div>
