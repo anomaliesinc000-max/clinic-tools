@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>あなたの回復ロードマップ</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=DM+Serif+Display:ital@0;1&display=swap');
+
+  :root {
+    --bg: #F7F4EF;
+    --ink: #1C1C1C;
+    --muted: #8A8070;
+    --accent-red: #E05A3A;
+    --accent-gold: #C9A84C;
+    --accent-green: #3A7D6E;
+    --accent-blue: #3A5FA0;
+    --card-bg: #FFFFFF;
+    --border: #E0D9D0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Noto Sans JP', sans-serif;
+    min-height: 100vh;
+    padding: 0 0 80px;
+    overflow-x: hidden;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--ink);
+    color: white;
+    padding: 28px 32px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    right: -40px; top: -40px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.1);
+  }
+  header .sub {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent-gold);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(26px, 6vw, 36px);
+    line-height: 1.15;
+    font-weight: 400;
+  }
+  header p {
+    margin-top: 10px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.6);
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  /* ── Section title ── */
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 28px 24px 14px;
+  }
+  .section-label .line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .section-label span {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  /* ── PHASE TIMELINE ── */
+  .timeline-wrap {
+    padding: 0 20px;
+  }
+
+  /* Top row: pain → zero (horizontal) */
+  .timeline-top {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 0;
+  }
+
+  .phase-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+
+  .phase-dot {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    border: 3px solid white;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.15);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .phase-node:hover .phase-dot {
+    transform: scale(1.1);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.22);
+  }
+  .phase-node.pain .phase-dot  { background: var(--accent-red); }
+  .phase-node.zero .phase-dot  { background: var(--accent-gold); }
+  .phase-node.self .phase-dot  { background: var(--accent-green); }
+  .phase-node.premium .phase-dot { background: #D4691E; }
+  .phase-node.posture .phase-dot { background: var(--accent-blue); }
+
+  .phase-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.4;
+    color: var(--ink);
+  }
+
+  /* Arrow between pain and zero */
+  .h-arrow {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+    padding-bottom: 24px; /* offset for label */
+  }
+  .h-arrow-line {
+    flex: 1;
+    height: 3px;
+    background: linear-gradient(to right, var(--accent-red), var(--accent-gold));
+    border-radius: 2px;
+    position: relative;
+  }
+  .h-arrow-line::after {
+    content: '▶';
+    position: absolute;
+    right: -8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+    color: var(--accent-gold);
+  }
+
+  /* Branch area */
+  .branch-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 0;
+  }
+
+  /* Vertical stem from zero down */
+  .v-stem {
+    width: 3px;
+    height: 28px;
+    background: var(--accent-gold);
+    border-radius: 2px;
+  }
+
+  /* Branch label */
+  .branch-label {
+    background: var(--accent-gold);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 6px;
+  }
+
+  /* 3 branch lines container */
+  .branch-lines {
+    display: flex;
+    width: 100%;
+    position: relative;
+    height: 36px;
+    margin-bottom: 0;
+  }
+  .branch-lines::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 16.66%;
+    right: 16.66%;
+    height: 3px;
+    background: linear-gradient(to right, var(--accent-green), #D4691E, var(--accent-blue));
+    border-radius: 2px;
+  }
+  .branch-lines .b-drop {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+  }
+  .branch-lines .b-drop::after {
+    content: '';
+    display: block;
+    width: 3px;
+    height: 100%;
+    border-radius: 2px;
+  }
+  .b-drop.self::after    { background: var(--accent-green); }
+  .b-drop.premium::after { background: #D4691E; }
+  .b-drop.posture::after { background: var(--accent-blue); }
+
+  /* Bottom 3 nodes */
+  .branch-nodes {
+    display: flex;
+    width: 100%;
+    gap: 0;
+  }
+  .branch-nodes .phase-node {
+    flex: 1;
+  }
+
+  /* ── Detail panels ── */
+  .detail-panel {
+    background: var(--card-bg);
+    border-radius: 16px;
+    margin: 14px 0 0;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+    position: relative;
+    overflow: hidden;
+    /* peek: show just the header bar + title */
+    max-height: 56px;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+  }
+  .detail-panel.active {
+    max-height: 600px;
+    cursor: default;
+  }
+  /* pain/zero panels: hidden by default, open on click */
+  .detail-panel.hidden-panel {
+    max-height: 0;
+    border: none;
+    margin: 0;
+    box-shadow: none;
+  }
+  .detail-panel.hidden-panel.active {
+    max-height: 600px;
+    border: 1px solid var(--border);
+    margin: 14px 0 0;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  }
+
+  /* peek header inside panel */
+  .panel-peek {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 16px 0;
+    pointer-events: none;
+  }
+  .panel-peek-title {
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .panel-peek-arrow {
+    font-size: 11px;
+    color: var(--muted);
+    transition: transform 0.3s;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+  .detail-panel.active .panel-peek-arrow {
+    transform: rotate(180deg);
+  }
+  /* hide arrow when fully open */
+  .detail-panel.active .panel-peek { padding-bottom: 0; }
+
+  .panel-body {
+    padding: 8px 18px 18px;
+  }
+
+  .detail-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+  }
+  .panel-pain::before    { background: var(--accent-red); }
+  .panel-zero::before    { background: var(--accent-gold); }
+  .panel-self::before    { background: var(--accent-green); }
+  .panel-premium::before { background: #D4691E; }
+  .panel-posture::before { background: var(--accent-blue); }
+
+  .panel-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 5px;
+  }
+  .panel-sub {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 14px;
+  }
+  .panel-items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .panel-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 11px 13px;
+  }
+  .panel-item-icon {
+    font-size: 19px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .panel-item-text strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+  .panel-item-text span {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ── WHY PAIN RETURNS ── */
+  .relapse-card {
+    margin: 8px 20px 0;
+    background: var(--card-bg);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  }
+
+  .relapse-header {
+    background: #FFF6F3;
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid #F0E0DA;
+  }
+  .relapse-header .tag {
+    display: inline-block;
+    background: var(--accent-red);
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    padding: 3px 8px;
+    border-radius: 20px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .relapse-header h3 {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+  .relapse-header p {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+    line-height: 1.6;
+  }
+
+  .cause-list {
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .cause-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .cause-bar-wrap {
+    flex: 1;
+  }
+  .cause-name {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .cause-name .pct {
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .cause-bar {
+    height: 8px;
+    background: var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .cause-bar-fill {
+    height: 100%;
+    border-radius: 10px;
+    background: var(--accent-red);
+    width: 0;
+    transition: width 1s ease 0.3s;
+  }
+  .cause-bar-fill.posture { background: var(--accent-red); }
+  .cause-bar-fill.movement { background: #E07A3A; }
+  .cause-bar-fill.habit { background: var(--accent-gold); }
+  .cause-bar-fill.other { background: var(--border); }
+  .cause-icon { font-size: 22px; flex-shrink: 0; }
+
+  .note-box {
+    margin: 0 20px 0;
+    background: #FFF9F0;
+    border: 1px solid #F0E0C0;
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 12px;
+    line-height: 1.7;
+    color: #6A5820;
+    display: flex;
+    gap: 10px;
+  }
+  .note-box .note-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── OPTION CARDS ── */
+  .options-wrap {
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .option-card {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1.5px solid var(--border);
+    background: var(--card-bg);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    transition: transform 0.18s, box-shadow 0.18s;
+  }
+  .option-card:active { transform: scale(0.98); }
+
+  .option-top {
+    padding: 18px 20px 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .option-icon-wrap {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  .card-self .option-icon-wrap { background: #EDF7F5; }
+  .card-premium .option-icon-wrap { background: #FFF6F0; }
+  .card-posture .option-icon-wrap { background: #EEF2FB; }
+
+  .option-meta {
+    flex: 1;
+  }
+  .option-meta .badge {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-bottom: 6px;
+  }
+  .card-self .badge { background: #D6F0EB; color: var(--accent-green); }
+  .card-premium .badge { background: #FFE8DC; color: var(--accent-red); }
+  .card-posture .badge { background: #DDE6F8; color: var(--accent-blue); }
+
+  .option-meta h3 {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.35;
+    margin-bottom: 4px;
+  }
+  .option-meta p {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .option-bottom {
+    border-top: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .chip {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: var(--bg);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .card-self .chip.active { background: #D6F0EB; color: var(--accent-green); border-color: transparent; }
+  .card-premium .chip.active { background: #FFE8DC; color: var(--accent-red); border-color: transparent; }
+  .card-posture .chip.active { background: #DDE6F8; color: var(--accent-blue); border-color: transparent; }
+
+  /* ── PAIN METER (graphic) ── */
+  .meter-section {
+    padding: 0 20px;
+  }
+  .meter-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  }
+  .meter-title {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .meter-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 18px;
+    line-height: 1.5;
+  }
+
+  .meter-track {
+    position: relative;
+    margin-bottom: 8px;
+  }
+  .meter-bar {
+    height: 22px;
+    border-radius: 30px;
+    background: linear-gradient(to right, var(--accent-red) 0%, var(--accent-gold) 50%, var(--accent-green) 100%);
+    position: relative;
+    overflow: visible;
+  }
+  .meter-marker {
+    position: absolute;
+    top: -6px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    transform: translateX(-50%);
+    transition: left 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    cursor: grab;
+    z-index: 2;
+  }
+  .meter-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+  }
+  .meter-labels span {
+    font-size: 10px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .meter-desc {
+    margin-top: 14px;
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 12px;
+    line-height: 1.6;
+    min-height: 48px;
+    transition: all 0.3s;
+    color: var(--ink);
+  }
+  .meter-desc strong { font-weight: 700; display: block; margin-bottom: 2px; font-size: 13px; }
+
+  /* ── footer ── */
+  footer {
+    text-align: center;
+    padding: 40px 20px 0;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="sub">Recovery Roadmap</div>
+  <h1>あなたの<br>回復ロードマップ</h1>
+  <p>痛みが消えた"その先"を、一緒に整理しましょう。</p>
+</header>
+
+<!-- STEP 1: PAIN METER -->
+<div class="section-label">
+  <div class="line"></div>
+  <span>Step 1 ── 今の状態を確認</span>
+  <div class="line"></div>
+</div>
+
+<div class="meter-section">
+  <div class="meter-card">
+    <div class="meter-title">今の痛みはどのくらいですか？</div>
+    <div class="meter-sub">スライダーを動かしてみてください</div>
+    <div class="meter-track">
+      <div class="meter-bar">
+        <div class="meter-marker" id="marker">😐</div>
+      </div>
+    </div>
+    <div class="meter-labels">
+      <span>🔥 強い痛み</span>
+      <span>⚡ 少し残る</span>
+      <span>✨ ゼロ!</span>
+    </div>
+    <input type="range" id="painSlider" min="0" max="100" value="50"
+      style="width:100%;margin-top:14px;accent-color:var(--accent-red);cursor:pointer;">
+    <div class="meter-desc" id="meterDesc">
+      <strong>スライダーを動かしてみましょう</strong>
+      痛みレベルに合わせたアドバイスが表示されます
+    </div>
+  </div>
+</div>
+
+<!-- STEP 2: WHY PAIN RETURNS -->
+<div class="section-label">
+  <div class="line"></div>
+  <span>Step 2 ── なぜ痛みは戻るのか</span>
+  <div class="line"></div>
+</div>
+
+<div class="relapse-card">
+  <div class="relapse-header">
+    <div class="tag">Important</div>
+    <h3>再発の原因は<br>「治療の質」ではない</h3>
+    <p>痛みが戻るのは先生の腕や施術の問題ではなく、<br>日常の姿勢・動き方のパターンが原因です。</p>
+  </div>
+  <div class="cause-list" id="causeList">
+    <div class="cause-item">
+      <div class="cause-icon">🪑</div>
+      <div class="cause-bar-wrap">
+        <div class="cause-name">
+          <span>姿勢のクセ（座り方・立ち方）</span>
+          <span class="pct" style="color: var(--accent-red)">高</span>
+        </div>
+        <div class="cause-bar"><div class="cause-bar-fill posture" data-width="85%"></div></div>
+      </div>
+    </div>
+    <div class="cause-item">
+      <div class="cause-icon">🚶</div>
+      <div class="cause-bar-wrap">
+        <div class="cause-name">
+          <span>動き方のパターン</span>
+          <span class="pct" style="color: #E07A3A">高</span>
+        </div>
+        <div class="cause-bar"><div class="cause-bar-fill movement" data-width="75%"></div></div>
+      </div>
+    </div>
+    <div class="cause-item">
+      <div class="cause-icon">😴</div>
+      <div class="cause-bar-wrap">
+        <div class="cause-name">
+          <span>生活習慣（睡眠・ストレス）</span>
+          <span class="pct" style="color: var(--accent-gold)">中</span>
+        </div>
+        <div class="cause-bar"><div class="cause-bar-fill habit" data-width="55%"></div></div>
+      </div>
+    </div>
+    <div class="cause-item">
+      <div class="cause-icon">🩺</div>
+      <div class="cause-bar-wrap">
+        <div class="cause-name">
+          <span>治療・施術の質</span>
+          <span class="pct" style="color: var(--muted)">低</span>
+        </div>
+        <div class="cause-bar"><div class="cause-bar-fill other" data-width="10%"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="note-box" style="margin: 10px 20px 0;">
+  <div class="note-icon">💡</div>
+  <div>つまり、<strong>姿勢と動き方を変えること</strong>が再発を防ぐ最大の鍵です。治療はその"下地"をつくるもの。土台ができたら、あとは日常で育てていきます。</div>
+</div>
+
+<!-- STEP 3: OPTIONS -->
+<div class="section-label">
+  <div class="line"></div>
+  <span>Step 3 ── 痛みゼロからの3つの選択肢</span>
+  <div class="line"></div>
+</div>
+
+<div class="options-wrap">
+  <div class="option-card card-self">
+    <div class="option-top">
+      <div class="option-icon-wrap">🏠</div>
+      <div class="option-meta">
+        <div class="badge">Option 1</div>
+        <h3>自己管理＋定期メンテナンス</h3>
+        <p>歯磨きと歯石取りの関係と同じ。日々のセルフケアをしながら、定期的に来院してプロのメンテナンスを受けるスタイル。</p>
+      </div>
+    </div>
+    <div class="option-bottom">
+      <div class="chip active">🪥 日常セルフケア</div>
+      <div class="chip active">📅 定期来院</div>
+      <div class="chip">自由度◎</div>
+    </div>
+  </div>
+
+  <div class="option-card card-premium">
+    <div class="option-top">
+      <div class="option-icon-wrap">🚶</div>
+      <div class="option-meta">
+        <div class="badge">Option 2</div>
+        <h3>機能改善コース</h3>
+        <p>歩き方・股関節の使い方など、正しい動きのパターンを体に定着させていくコース。気づいたら自然に楽に動けている状態を目指します。</p>
+      </div>
+    </div>
+    <div class="option-bottom">
+      <div class="chip active">🚶 歩き方の改善</div>
+      <div class="chip active">🔄 動き方の定着</div>
+      <div class="chip">日常動作の質を上げる</div>
+    </div>
+  </div>
+
+  <div class="option-card card-posture">
+    <div class="option-top">
+      <div class="option-icon-wrap">🪞</div>
+      <div class="option-meta">
+        <div class="badge">Option 3</div>
+        <h3>姿勢改善コース</h3>
+        <p>姿勢を本気で治したい方のためのコース。美しい姿勢は簡単には手に入らないからこそ、専用のプログラムで根本から取り組みます。機能改善（動き方）とは別のアプローチです。</p>
+      </div>
+    </div>
+    <div class="option-bottom">
+      <div class="chip active">🪞 美しい姿勢へ</div>
+      <div class="chip active">💪 本気で治す</div>
+      <div class="chip">専用プログラム</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <span style="font-size:10px; opacity:.6;">— 患者向け説明ツール —</span>
+</footer>
+
+<script>
+  // ── Animate bars on scroll ──
+  function animateBars() {
+    document.querySelectorAll('.cause-bar-fill').forEach(bar => {
+      const w = bar.dataset.width;
+      bar.style.width = '0';
+      setTimeout(() => { bar.style.width = w; }, 400);
+    });
+  }
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { animateBars(); observer.disconnect(); } });
+  }, { threshold: 0.3 });
+  const causeList = document.getElementById('causeList');
+  if (causeList) observer.observe(causeList);
+
+  // ── Pain meter ──
+  const slider = document.getElementById('painSlider');
+  const marker = document.getElementById('marker');
+  const desc = document.getElementById('meterDesc');
+
+  const stages = [
+    {
+      range: [0, 30],
+      emoji: '🔥',
+      color: '#E05A3A',
+      title: '強い痛みがある段階',
+      text: '今は治療で痛みを取り除くことが最優先です。姿勢や動き方の話は、少し痛みが落ち着いてから一緒に整理しましょう。'
+    },
+    {
+      range: [31, 65],
+      emoji: '😐',
+      color: '#C9A84C',
+      title: '痛みが残っている段階',
+      text: '改善は感じていますか？このタイミングで「どんな姿勢・動きで悪化するか」を意識し始めると、回復が早まります。'
+    },
+    {
+      range: [66, 89],
+      emoji: '🙂',
+      color: '#7BAD8A',
+      title: 'もう少しでゼロ！',
+      text: 'あと少しです。痛みがゼロになったら"次のステップ"を一緒に考えましょう。下の3つの選択肢から選べます。'
+    },
+    {
+      range: [90, 100],
+      emoji: '🎉',
+      color: '#3A7D6E',
+      title: '痛みゼロ！おめでとうございます',
+      text: 'ここからが本番です。「自己管理＋定期メンテナンス」「機能改善コース」「姿勢改善コース」の3つから、自分に合った道を選びましょう。'
+    }
+  ];
+
+  function updateMeter(val) {
+    marker.style.left = val + '%';
+    const stage = stages.find(s => val >= s.range[0] && val <= s.range[1]);
+    if (stage) {
+      marker.textContent = stage.emoji;
+      marker.style.borderColor = stage.color;
+      desc.innerHTML = `<strong style="color:${stage.color}">${stage.title}</strong>${stage.text}`;
+    }
+  }
+
+  slider.addEventListener('input', e => updateMeter(parseInt(e.target.value)));
+  updateMeter(50);
+</script>
+</body>
+</html>
